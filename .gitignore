@@ -1,0 +1,6 @@
+local_settings.py
+local_settings_dev.py
+*.msg
+*.pyc
+__pycache__
+.venv

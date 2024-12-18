@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+# Base URL of OpenCTI instance
+octi_url = 'http://localhost:8080'
+
+# The OpenCTI API token you want to use
+octi_token = 'token-here'
