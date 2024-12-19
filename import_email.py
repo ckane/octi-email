@@ -55,7 +55,7 @@ def filter_dns_defects(data):
     if re.compile(r'\.(png|gif|jpg|html|htm)$').search(data):
         return False
 
-    if data.find('>') >= 0 or data.find('<') >= 0:
+    if data.find('>') >= 0 or data.find('<') >= 0 or data.find('.') < 0:
         return False
 
     return True
