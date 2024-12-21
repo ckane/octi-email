@@ -8,6 +8,7 @@ from dateutil.parser import parse as dateparse
 from argparse import ArgumentParser, BooleanOptionalAction
 from email.parser import BytesParser as EmailBytesParser
 from email.policy import default as default_email_policy
+from email.message import EmailMessage
 from pycti import OpenCTIApiClient
 
 from local_settings import octi_url, octi_token
