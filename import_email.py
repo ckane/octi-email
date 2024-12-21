@@ -107,14 +107,20 @@ class EmailIngest(object):
         )['id']
 
     def parse_incident(self):
+        emldate = None
+        try:
+            emldate = dateparse(self.msg['date']).strftime('%Y-%m-%dT%H:%M:%SZ')
+        except:
+            log.error('Error parsing date: {}'.format(self.msg['date']))
+
         inc = {
             'stix_id': self.octi.incident.generate_id(self.msg['message-id'] if self.msg['message-id'] != None else 'NO-MSG-ID',
-                                                      self.msg['date'] if self.msg['date'] != None else 'NO-DATE'),
+                                                      emldate if emldate != None else 'NO-DATE'),
             'objectMarking': self.green,
             'confidence': 80,
             'createdBy': self.myself,
             'lang': 'en',
-            'created': dateparse(self.msg['date']).strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'created': emldate,
             'modified': datetime.now(UTC).strftime('%Y-%m-%dT%H:%M:%SZ'),
             'name': 'Phish: "{}"'.format(self.msg['Subject']),
             'incident_type': 'phishing',
@@ -130,6 +136,12 @@ class EmailIngest(object):
     def parse_email(self, rhs):
         mid = sanitize_content(self.msg['message-id'])
 
+        emldate = None
+        try:
+            emldate = dateparse(self.msg['date']).strftime('%Y-%m-%dT%H:%M:%SZ')
+        except:
+            log.error('Error parsing date: {}'.format(self.msg['date']))
+
         body = ""
         for btype in ['plain', 'html']:
             try:
@@ -143,14 +155,28 @@ class EmailIngest(object):
             if body:
                 break
 
-        adjdate = dateparse(self.msg['date']).strftime('%Y-%m-%dT%H:%M:%SZ')
+        # Make empty body if no body
+        if not body:
+            body = 'NO BODY'
+
+        if isinstance(body, EmailMessage):
+            try:
+                body = body.get_content()
+            except:
+                log.error('Couldn\'t parse email body')
+                body = 'NO BODY'
+
+        subject = str(self.msg['subject'])
+        if not subject:
+            subject = 'NO SUBJECT'
+
         email = {
             'observableData': {
                 'is_multipart': self.msg.is_multipart(),
-                'date': adjdate,
+                'date': emldate,
                 'type': 'Email-Message',
                 'message_id': mid,
-                'subject': str(self.msg['subject']),
+                'subject': subject,
                 'received_lines': rhs,
                 'body': body,
             },
@@ -158,7 +184,11 @@ class EmailIngest(object):
             'objectMarking': self.green,
             'update': self.args.update,
         }
-        self.email = self.octi.stix_cyber_observable.create(**email)
+        try:
+            self.email = self.octi.stix_cyber_observable.create(**email)
+        except:
+            log.error(f"Failed creating email {email}")
+            raise "Failed"
 
         body_objs = []
         if body:
@@ -177,6 +207,8 @@ class EmailIngest(object):
                     }
                     try:
                         i = self.octi.stix_cyber_observable.create(**ip)
+                        if i == None:
+                            log.error(f'OpenCTI returned None for {i}')
                         body_objs.append(i)
                     except:
                         log.error('Failed IOC upload: {ioc}'.format(ioc=ip))
@@ -193,6 +225,8 @@ class EmailIngest(object):
                     }
                     try:
                         i = self.octi.stix_cyber_observable.create(**ip)
+                        if i == None:
+                            log.error(f'OpenCTI returned None for {i}')
                         body_objs.append(i)
                     except:
                         log.error('Failed IOC upload: {ioc}'.format(ioc=ip))
@@ -209,6 +243,8 @@ class EmailIngest(object):
                     }
                     try:
                         e = self.octi.stix_cyber_observable.create(**ea)
+                        if e == None:
+                            log.error(f'OpenCTI returned None for {e}')
                         body_objs.append(e)
                     except:
                         log.error('Failed IOC upload: {ioc}'.format(ioc=ea))
@@ -225,6 +261,8 @@ class EmailIngest(object):
                     }
                     try:
                         u = self.octi.stix_cyber_observable.create(**url)
+                        if u == None:
+                            log.error(f'OpenCTI returned None for {u}')
                         body_objs.append(u)
                     except:
                         log.error('Failed IOC upload: {ioc}'.format(ioc=url))
@@ -241,6 +279,8 @@ class EmailIngest(object):
                     }
                     try:
                         d = self.octi.stix_cyber_observable.create(**domain)
+                        if d == None:
+                            log.error(f'OpenCTI returned None for {d}')
                         body_objs.append(d)
                     except:
                         log.error('Failed IOC upload: {ioc}'.format(ioc=domain))
@@ -284,6 +324,8 @@ class EmailIngest(object):
                             }
                             try:
                                 e = self.octi.stix_cyber_observable.create(**email_addr)
+                                if e == None:
+                                    log.error(f'OpenCTI returned None for {e}')
                                 stix_objs.append(e)
                             except:
                                 log.error('Failed IOC upload: {ioc}'.format(ioc=email_addr))
@@ -321,7 +363,7 @@ class EmailIngest(object):
 
         # Parse out Received: headers
         rhs = []
-        for rh in (sanitize_content(r) for r in self.msg.get_all('Received')):
+        for rh in (sanitize_content(r) for r in self.msg.get_all('Received', failobj=())):
             if not rh:
                 continue
             rhs.append(rh)
@@ -339,6 +381,8 @@ class EmailIngest(object):
                 try:
                     i = self.octi.stix_cyber_observable.create(**ip)
                     stix_objs.append(i)
+                    if i == None:
+                        log.error(f'OpenCTI returned None for {i}')
                 except:
                     log.error('Failed IOC upload: {ioc}'.format(ioc=ip))
 
@@ -356,6 +400,8 @@ class EmailIngest(object):
                 try:
                     i = self.octi.stix_cyber_observable.create(**ip)
                     stix_objs.append(i)
+                    if i == None:
+                        log.error(f'OpenCTI returned None for {i}')
                 except:
                     log.error('Failed IOC upload: {ioc}'.format(ioc=ip))
 
@@ -372,6 +418,8 @@ class EmailIngest(object):
                 try:
                     e = self.octi.stix_cyber_observable.create(**ea)
                     stix_objs.append(e)
+                    if e == None:
+                        log.error(f'OpenCTI returned None for {e}')
                 except:
                     log.error('Failed IOC upload: {ioc}'.format(ioc=ea))
 
@@ -388,6 +436,8 @@ class EmailIngest(object):
                 try:
                     u = self.octi.stix_cyber_observable.create(**url)
                     stix_objs.append(u)
+                    if u == None:
+                        log.error(f'OpenCTI returned None for {url}')
                 except:
                     log.error('Failed IOC upload: {ioc}'.format(ioc=url))
 
@@ -404,22 +454,34 @@ class EmailIngest(object):
                 try:
                     d = self.octi.stix_cyber_observable.create(**domain)
                     stix_objs.append(d)
+                    if d == None:
+                        log.error(f'OpenCTI returned None for {domain}')
                 except:
                     log.error('Failed IOC upload: {ioc}'.format(ioc=domain))
 
         self.parse_email(rhs)
 
         for a in self.msg.iter_attachments():
-            artifact = {
-                'file_name': a.get_filename(),
-                'mime_type': a.get_content_type(),
-                'data': a.get_content(),
-                'x_opencti_description': 'Was attached to phishing email',
-                'createdBy': self.myself,
-                'objectMarking': self.green,
-            }
-            a = self.octi.stix_cyber_observable.upload_artifact(**artifact)
-            stix_objs.append(a)
+            content = None
+            try:
+                content = a.get_content()
+            except:
+                log.error(f'Failed to get attachment content for {a}')
+                content = None
+
+            if content:
+                artifact = {
+                    'file_name': a.get_filename(failobj='attachment'),
+                    'mime_type': a.get_content_type(),
+                    'data': a.get_content(),
+                    'x_opencti_description': 'Was attached to phishing email',
+                    'createdBy': self.myself,
+                    'objectMarking': self.green,
+                }
+                a = self.octi.stix_cyber_observable.upload_artifact(**artifact)
+                if a == None:
+                    log.error(f'OpenCTI returned None for {artifact}')
+                stix_objs.append(a)
 
         stix_objs.extend(self.body_objs)
 
