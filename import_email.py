@@ -468,7 +468,7 @@ class EmailIngest(object):
         for a in self.msg.iter_attachments():
             content = None
             try:
-                content = a.get_content()
+                content = bytes(a.get_content())
             except:
                 log.error(f'Failed to get attachment content for {a}')
                 content = None
@@ -477,7 +477,7 @@ class EmailIngest(object):
                 artifact = {
                     'file_name': a.get_filename(failobj='attachment'),
                     'mime_type': a.get_content_type(),
-                    'data': a.get_content(),
+                    'data': content,
                     'x_opencti_description': 'Was attached to phishing email',
                     'createdBy': self.myself,
                     'objectMarking': self.green,
