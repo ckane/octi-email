@@ -208,7 +208,7 @@ class EmailIngest(object):
                     try:
                         i = self.octi.stix_cyber_observable.create(**ip)
                         if i == None:
-                            log.error(f'OpenCTI returned None for {i}')
+                            log.error(f'OpenCTI returned None for {ip}')
                         body_objs.append(i)
                     except:
                         log.error('Failed IOC upload: {ioc}'.format(ioc=ip))
@@ -226,7 +226,7 @@ class EmailIngest(object):
                     try:
                         i = self.octi.stix_cyber_observable.create(**ip)
                         if i == None:
-                            log.error(f'OpenCTI returned None for {i}')
+                            log.error(f'OpenCTI returned None for {ip}')
                         body_objs.append(i)
                     except:
                         log.error('Failed IOC upload: {ioc}'.format(ioc=ip))
@@ -244,7 +244,7 @@ class EmailIngest(object):
                     try:
                         e = self.octi.stix_cyber_observable.create(**ea)
                         if e == None:
-                            log.error(f'OpenCTI returned None for {e}')
+                            log.error(f'OpenCTI returned None for {ea}')
                         body_objs.append(e)
                     except:
                         log.error('Failed IOC upload: {ioc}'.format(ioc=ea))
@@ -262,7 +262,7 @@ class EmailIngest(object):
                     try:
                         u = self.octi.stix_cyber_observable.create(**url)
                         if u == None:
-                            log.error(f'OpenCTI returned None for {u}')
+                            log.error(f'OpenCTI returned None for {url}')
                         body_objs.append(u)
                     except:
                         log.error('Failed IOC upload: {ioc}'.format(ioc=url))
@@ -280,7 +280,7 @@ class EmailIngest(object):
                     try:
                         d = self.octi.stix_cyber_observable.create(**domain)
                         if d == None:
-                            log.error(f'OpenCTI returned None for {d}')
+                            log.error(f'OpenCTI returned None for {domain}')
                         body_objs.append(d)
                     except:
                         log.error('Failed IOC upload: {ioc}'.format(ioc=domain))
@@ -325,7 +325,7 @@ class EmailIngest(object):
                             try:
                                 e = self.octi.stix_cyber_observable.create(**email_addr)
                                 if e == None:
-                                    log.error(f'OpenCTI returned None for {e}')
+                                    log.error(f'OpenCTI returned None for {email_addr}')
                                 stix_objs.append(e)
                             except:
                                 log.error('Failed IOC upload: {ioc}'.format(ioc=email_addr))
@@ -382,7 +382,7 @@ class EmailIngest(object):
                     i = self.octi.stix_cyber_observable.create(**ip)
                     stix_objs.append(i)
                     if i == None:
-                        log.error(f'OpenCTI returned None for {i}')
+                        log.error(f'OpenCTI returned None for {ip}')
                 except:
                     log.error('Failed IOC upload: {ioc}'.format(ioc=ip))
 
@@ -401,7 +401,7 @@ class EmailIngest(object):
                     i = self.octi.stix_cyber_observable.create(**ip)
                     stix_objs.append(i)
                     if i == None:
-                        log.error(f'OpenCTI returned None for {i}')
+                        log.error(f'OpenCTI returned None for {ip}')
                 except:
                     log.error('Failed IOC upload: {ioc}'.format(ioc=ip))
 
@@ -419,7 +419,7 @@ class EmailIngest(object):
                     e = self.octi.stix_cyber_observable.create(**ea)
                     stix_objs.append(e)
                     if e == None:
-                        log.error(f'OpenCTI returned None for {e}')
+                        log.error(f'OpenCTI returned None for {ea}')
                 except:
                     log.error('Failed IOC upload: {ioc}'.format(ioc=ea))
 
