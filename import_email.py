@@ -331,36 +331,39 @@ class EmailIngest(object):
                             except:
                                 log.error('Failed IOC upload: {ioc}'.format(ioc=email_addr))
 
-                            domain_name = {
-                                'observableData': {
-                                    'value': addr.domain,
-                                    'type': 'Domain-Name',
-                                },
-                                'createdBy': self.myself,
-                                'objectMarking': self.green,
-                                'update': self.args.update,
-                            }
-                            try:
-                                d = self.octi.stix_cyber_observable.create(**domain_name)
-                                stix_objs.append(d)
-
-                                rel = {
-                                    'toId': e['id'],
-                                    'fromId': d['id'],
-                                    'relationship_type': 'related-to',
-                                    'objectMarking': self.green,
-                                    'confidence': 80,
-                                    'description': 'Derived domain-name from email address',
+                            if addr.domain.find('@') >= 0:
+                                domain_name = {
+                                    'observableData': {
+                                        'value': addr.domain,
+                                        'type': 'Domain-Name',
+                                    },
                                     'createdBy': self.myself,
+                                    'objectMarking': self.green,
                                     'update': self.args.update,
                                 }
                                 try:
-                                    r = self.octi.stix_core_relationship.create(**rel)
-                                    stix_rels.append(r)
+                                    d = self.octi.stix_cyber_observable.create(**domain_name)
+                                    if d == None:
+                                        log.error(f'OpenCTI returned None for {domain_name}')
+                                    stix_objs.append(d)
+
+                                    rel = {
+                                        'toId': e['id'],
+                                        'fromId': d['id'],
+                                        'relationship_type': 'related-to',
+                                        'objectMarking': self.green,
+                                        'confidence': 80,
+                                        'description': 'Derived domain-name from email address',
+                                        'createdBy': self.myself,
+                                        'update': self.args.update,
+                                    }
+                                    try:
+                                        r = self.octi.stix_core_relationship.create(**rel)
+                                        stix_rels.append(r)
+                                    except:
+                                        log.error('Failed relationship upload: {rel}'.format(rel=rel))
                                 except:
-                                    log.error('Failed relationship upload: {rel}'.format(rel=rel))
-                            except:
-                                log.error('Failed IOC upload: {ioc}'.format(ioc=domain_name))
+                                    log.error('Failed IOC upload: {ioc}'.format(ioc=domain_name))
 
         # Parse out Received: headers
         rhs = []
