@@ -55,7 +55,7 @@ fileext_re = re.compile(r'\.(png|gif|jpg|html|htm)$')  # Common file extensions
 # Microsoft mail infrastructure
 msmail_re = re.compile(r'\.(protection\.outlook\.com|prod\.outlook\.com|prod\.exchangelabs\.com|outlook\.office365\.com)$')
 # Google mail infrastructure
-gmail_re = re.compile(r'^(mail-[\S]+|postmaster)\.google\.com$')
+gmail_re = re.compile(r'^(mail-[\S]+|postmaster|mx)\.google\.com$')
 # ProofPoint mail infrastructure
 ppoint_re = re.compile(r'\.pphosted\.com$')
 # primary domains of popular mail hosters
