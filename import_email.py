@@ -58,13 +58,14 @@ msmail_re = re.compile(r'\.(protection\.outlook\.com|prod\.outlook\.com|prod\.ex
 gmail_re = re.compile(r'^(mail-[\S]+|postmaster|mx)\.google\.com$')
 # ProofPoint mail infrastructure
 ppoint_re = re.compile(r'\.pphosted\.com$')
+mimecast_re = re.compile(r'\.mimecast\.com$')
 # primary domains of popular mail hosters
 maildom_re = re.compile(r'^(yahoo\.com|gmail\.com|google\.com|outlook\.com|hotmail\.com|protonmail\.com|aol\.com)$')
 
 def filter_dns_defects(data):
     # Bad extensions
     if fileext_re.search(data) or msmail_re.search(data) or gmail_re.fullmatch(data) or maildom_re.fullmatch(data) or \
-            ppoint_re.search(data):
+            ppoint_re.search(data) or mimecast_re.search(data):
         return False
 
     if data.find('>') >= 0 or data.find('<') >= 0 or data.find('.') < 0:
