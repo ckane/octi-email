@@ -23,7 +23,6 @@ def sanitize_content(data):
     # data = data.replace('sensitive data', 'REDACTED')
     return data
 
-
 def filter_ipv4_defects(data):
     # Only accept real IPs
     for x in data.split('.'):
@@ -51,9 +50,18 @@ def filter_url_defects(data):
 
     return True
 
+# Precompile some regexes representing noisy or poor DNS indicators
+fileext_re = re.compile(r'\.(png|gif|jpg|html|htm)$')  # Common file extensions
+# Microsoft mail infrastructure
+msmail_re = re.compile(r'\.(protection\.outlook\.com|prod\.outlook\.com|prod\.exchangelabs\.com|outlook\.office365\.com)$')
+# Google mail infrastructure
+gmail_re = re.compile(r'^(mail-[\S]+|postmaster)\.google\.com$')
+# primary domains of popular mail hosters
+maildom_re = re.compile(r'^(yahoo\.com|gmail\.com|google\.com|outlook\.com|hotmail\.com|protonmail\.com|aol\.com)$')
+
 def filter_dns_defects(data):
     # Bad extensions
-    if re.compile(r'\.(png|gif|jpg|html|htm)$').search(data):
+    if fileext_re.search(data) or msmail_re.search(data) or gmail_re.fullmatch(data) or maildom_re.fullmatch(data):
         return False
 
     if data.find('>') >= 0 or data.find('<') >= 0 or data.find('.') < 0:
@@ -268,7 +276,7 @@ class EmailIngest(object):
                     except:
                         log.error('Failed IOC upload: {ioc}'.format(ioc=url))
 
-                for dom in filter(filter_dns_defects, iocs['dns']):
+                for dom in filter(filter_dns_defects, (d.lower() for d in iocs['dns'])):
                     domain = {
                         'observableData': {
                             'value': dom,
@@ -445,7 +453,7 @@ class EmailIngest(object):
                 except:
                     log.error('Failed IOC upload: {ioc}'.format(ioc=url))
 
-            for dom in filter(filter_dns_defects, iocs['dns']):
+            for dom in filter(filter_dns_defects, (d.lower() for d in iocs['dns'])):
                 domain = {
                     'observableData': {
                         'value': dom,
