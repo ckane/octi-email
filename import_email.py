@@ -55,7 +55,7 @@ fileext_re = re.compile(r'\.(png|gif|jpg|html|htm)$')  # Common file extensions
 # Microsoft mail infrastructure
 msmail_re = re.compile(r'\.(protection\.outlook\.com|prod\.outlook\.com|prod\.exchangelabs\.com|outlook\.office365\.com)$')
 # Google mail infrastructure
-gmail_re = re.compile(r'^(mail-[\S]+|postmaster|mx)\.google\.com$')
+gmail_re = re.compile(r'^(mail-[\S]+|postmaster|mx)\.(google|gmail)\.com$')
 # ProofPoint mail infrastructure
 ppoint_re = re.compile(r'\.pphosted\.com$')
 mimecast_re = re.compile(r'\.mimecast\.com$')
@@ -63,7 +63,7 @@ mimecast_re = re.compile(r'\.mimecast\.com$')
 maildom_re = re.compile(r'^(yahoo\.com|gmail\.com|google\.com|outlook\.com|hotmail\.com|protonmail\.com|aol\.com)$')
 
 def filter_dns_defects(data):
-    # Bad extensions
+    # Bad extensions and well-known SaaS mail domains
     if fileext_re.search(data) or msmail_re.search(data) or gmail_re.fullmatch(data) or maildom_re.fullmatch(data) or \
             ppoint_re.search(data) or mimecast_re.search(data):
         return False
